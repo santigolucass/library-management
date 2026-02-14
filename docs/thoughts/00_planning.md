@@ -15,3 +15,7 @@ I decided to define the API contract before implementing controllers to:
 - Avoid refactoring later
 - Enable frontend integration in parallel
 
+---
+
+Prompt used: [prompts/00_openapi_requirements_generation.md](prompts/00_openapi_requirements_generation.md)
+
