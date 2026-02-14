@@ -1,24 +1,60 @@
-# README
+# Library Management API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Local Infrastructure Setup (PostgreSQL + dotenv)
 
-Things you may want to cover:
+This project runs Rails locally and PostgreSQL in Docker Compose.
 
-* Ruby version
+### 1. Install dependencies
 
-* System dependencies
+```bash
+bundle install
+```
 
-* Configuration
+### 2. Configure environment files
 
-* Database creation
+`.env.development` and `.env.test` are used by `dotenv-rails`.
 
-* Database initialization
+Use `.env.example` as the template:
 
-* How to run the test suite
+```bash
+cp .env.example .env.development
+cp .env.example .env.test
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+Default local settings use PostgreSQL on host port `5433`.
 
-* Deployment instructions
+### 3. Start PostgreSQL with Docker Compose
 
-* ...
+```bash
+docker compose up -d db
+docker compose ps
+```
+
+### 4. Prepare databases
+
+```bash
+bin/rails db:prepare
+RAILS_ENV=test bin/rails db:prepare
+```
+
+### 5. Validate database connectivity
+
+```bash
+bin/rails runner "ActiveRecord::Base.connection.execute('SELECT 1')"
+RAILS_ENV=test bin/rails runner "ActiveRecord::Base.connection.execute('SELECT 1')"
+```
+
+## Environment Variables
+
+- `DB_HOST`
+- `DB_PORT` (default local: `5433`)
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `DB_NAME_DEVELOPMENT`
+- `DB_NAME_TEST`
+
+## Common Troubleshooting
+
+- Port conflict on `5433`: choose another host port and update `DB_PORT`.
+- Authentication errors (`PG::ConnectionBad`): ensure compose and `.env.*` credentials match.
+- Test database issues: verify `RAILS_ENV=test` and `DB_NAME_TEST` are configured separately from development.
