@@ -1,0 +1,371 @@
+openapi: 3.1.0
+info:
+  title: Library Management API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    ValidationError:
+      type: object
+      properties:
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+      required: [errors]
+
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        role: { type: string, enum: [librarian, member] }
+      required: [id, email, role]
+
+    AuthResponse:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        token:
+          type: string
+          description: JWT access token (also returned in Authorization header)
+      required: [user, token]
+
+    Book:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        author: { type: string }
+        genre: { type: string }
+        isbn: { type: string }
+        total_copies: { type: integer, minimum: 0 }
+        available_copies: { type: integer, minimum: 0 }
+      required: [id, title, author, genre, isbn, total_copies, available_copies]
+
+    BookCreate:
+      type: object
+      properties:
+        title: { type: string }
+        author: { type: string }
+        genre: { type: string }
+        isbn: { type: string }
+        total_copies: { type: integer, minimum: 0 }
+      required: [title, author, genre, isbn, total_copies]
+
+    Borrowing:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        book_id: { type: integer }
+        borrowed_at: { type: string, format: date-time }
+        due_at: { type: string, format: date-time }
+        returned_at:
+          type: [string, "null"]
+          format: date-time
+      required: [id, user_id, book_id, borrowed_at, due_at, returned_at]
+
+    BorrowCreate:
+      type: object
+      properties:
+        book_id: { type: integer }
+      required: [book_id]
+
+    LibrarianDashboard:
+      type: object
+      properties:
+        total_books: { type: integer }
+        total_borrowed_books: { type: integer }
+        books_due_today: { type: integer }
+        overdue_members:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id: { type: integer }
+              email: { type: string, format: email }
+              overdue_count: { type: integer }
+            required: [user_id, email, overdue_count]
+      required: [total_books, total_borrowed_books, books_due_today, overdue_members]
+
+    MemberDashboard:
+      type: object
+      properties:
+        active_borrowings:
+          type: array
+          items: { $ref: '#/components/schemas/Borrowing' }
+        overdue_borrowings:
+          type: array
+          items: { $ref: '#/components/schemas/Borrowing' }
+      required: [active_borrowings, overdue_borrowings]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      security: []
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                role: { type: string, enum: [librarian, member] }
+              required: [email, password]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationError' }
+
+  /auth/login:
+    post:
+      security: []
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+              required: [email, password]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/logout:
+    delete:
+      summary: Logout (invalidate token if using allowlist/denylist)
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /books:
+    get:
+      summary: List/search books
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+          description: Search by title/author/genre
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Book' }
+                required: [data]
+    post:
+      summary: Create book (librarian only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Book' }
+                required: [data]
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '422': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' } } } }
+
+  /books/{id}:
+    get:
+      summary: Get a book
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Book' }
+                required: [data]
+        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    patch:
+      summary: Update book (librarian only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookCreate' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Book' }
+                required: [data]
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '422': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/ValidationError' } } } }
+    delete:
+      summary: Delete book (librarian only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+  /borrowings:
+    get:
+      summary: "List borrowings (member: own; librarian: all)"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Borrowing' }
+                required: [data]
+
+  /borrowings/borrow:
+    post:
+      summary: Borrow a book (member only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BorrowCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Borrowing' }
+                required: [data]
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '409':
+          description: Conflict (unavailable or duplicate active borrow)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /borrowings/{id}/return:
+    post:
+      summary: Mark as returned (librarian only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Borrowing' }
+                required: [data]
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+  /dashboard/librarian:
+    get:
+      summary: Librarian dashboard
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LibrarianDashboard' }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+  /dashboard/member:
+    get:
+      summary: Member dashboard
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MemberDashboard' }
+        '403': { description: Forbidden, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
