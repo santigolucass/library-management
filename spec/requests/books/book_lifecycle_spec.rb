@@ -68,4 +68,13 @@ RSpec.describe "Books lifecycle", type: :request do
     expect(response).to have_http_status(:no_content)
     expect(Book.exists?(book.id)).to be(false)
   end
+
+  it "returns conflict when delete restriction is raised during destroy" do
+    allow_any_instance_of(Book).to receive(:destroy!).and_raise(ActiveRecord::DeleteRestrictionError.new("Book"))
+
+    delete "/api/v1/books/#{book.id}", headers: headers, as: :json
+
+    expect(response).to have_http_status(:conflict)
+    expect(json_response).to eq("error" => "Conflict")
+  end
 end

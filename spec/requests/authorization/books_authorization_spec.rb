@@ -76,7 +76,7 @@ RSpec.describe "Books authorization", type: :request do
     delete "/api/v1/books/#{book.id}", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
 
     expect(response).to have_http_status(:conflict)
-    expect(json_response).to include("error")
+    expect(json_response).to eq("error" => "Book has active borrowings")
   end
 
   it "returns 204 when deleting a book that has only returned borrowings" do
