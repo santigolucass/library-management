@@ -47,7 +47,7 @@ overdue.save!
 
 Book.find_each do |book|
   active_count = book.borrowings.active.count
-  desired_available = [book.total_copies - active_count, 0].max
+  desired_available = [ book.total_copies - active_count, 0 ].max
   next if book.available_copies == desired_available
 
   book.update!(available_copies: desired_available)
