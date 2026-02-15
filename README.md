@@ -58,3 +58,31 @@ RAILS_ENV=test bin/rails runner "ActiveRecord::Base.connection.execute('SELECT 1
 - Port conflict on `5433`: choose another host port and update `DB_PORT`.
 - Authentication errors (`PG::ConnectionBad`): ensure compose and `.env.*` credentials match.
 - Test database issues: verify `RAILS_ENV=test` and `DB_NAME_TEST` are configured separately from development.
+
+## Test Baseline Setup (RSpec + SimpleCov)
+
+### Install and prepare
+
+```bash
+bundle install
+docker compose up -d db
+RAILS_ENV=test bin/rails db:prepare
+```
+
+### Run tests
+
+```bash
+bundle exec rspec
+```
+
+### View coverage report
+
+Coverage HTML is generated at:
+
+`coverage/index.html`
+
+On macOS:
+
+```bash
+open coverage/index.html
+```
