@@ -127,3 +127,19 @@ bundle exec rspec spec/requests/auth
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `DELETE /api/v1/auth/logout`
+
+## Authorization (Pundit)
+
+Role behavior:
+- Librarian: can create/update/delete books, return borrowings, access librarian dashboard, list all borrowings.
+- Member: can list/show books, borrow books, access member dashboard, list only own borrowings.
+
+Forbidden authorization responses return:
+
+`{ "error": "Forbidden" }` with status `403`.
+
+Run authorization request specs:
+
+```bash
+bundle exec rspec spec/requests/authorization
+```
