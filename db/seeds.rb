@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-TOTAL_MEMBERS = 100
-TOTAL_BOOKS = 300
-TOTAL_BORROWINGS = 10_000
-ACTIVE_BORROWINGS = 2_500
-OVERDUE_BORROWINGS = 1_500
+TOTAL_MEMBERS = 30
+TOTAL_BOOKS = 50
+TOTAL_BORROWINGS = 1_000
+ACTIVE_BORROWINGS = 250
+OVERDUE_BORROWINGS = 150
 RETURNED_BORROWINGS = TOTAL_BORROWINGS - ACTIVE_BORROWINGS - OVERDUE_BORROWINGS
 HOT_BOOK_COUNT = 10
+BOOK_TOTAL_COPIES = 25
 DEFAULT_PASSWORD = "123123123"
 
 now = Time.current
@@ -37,8 +38,8 @@ book_rows = Array.new(TOTAL_BOOKS) do |index|
     author: "Author #{(index % 40) + 1}",
     genre: ["Software", "Sci-Fi", "History", "Fantasy", "Biography"][index % 5],
     isbn: format("978000%07d", index + 1),
-    total_copies: 60,
-    available_copies: 60,
+    total_copies: BOOK_TOTAL_COPIES,
+    available_copies: BOOK_TOTAL_COPIES,
     created_at: now,
     updated_at: now
   }
