@@ -20,5 +20,6 @@ RSpec.describe "db/seeds.rb" do
     expect(Borrowing.where(returned_at: nil).count).to be > 0
     expect(Borrowing.where(returned_at: nil).where("due_at < ?", Time.current).count).to be > 0
     expect(Borrowing.where.not(returned_at: nil).count).to be > 0
+    expect(Book.where(available_copies: 0).count).to be > 0
   end
 end

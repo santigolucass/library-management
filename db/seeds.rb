@@ -6,6 +6,7 @@ TOTAL_BORROWINGS = 10_000
 ACTIVE_BORROWINGS = 2_500
 OVERDUE_BORROWINGS = 1_500
 RETURNED_BORROWINGS = TOTAL_BORROWINGS - ACTIVE_BORROWINGS - OVERDUE_BORROWINGS
+HOT_BOOK_COUNT = 10
 DEFAULT_PASSWORD = "123123123"
 
 now = Time.current
@@ -50,7 +51,14 @@ member_ids = members.map(&:id)
 book_ids = books.map(&:id)
 
 non_returned_count = ACTIVE_BORROWINGS + OVERDUE_BORROWINGS
-non_returned_pairs = member_ids.product(book_ids).sample(non_returned_count)
+hot_book_ids = book_ids.first(HOT_BOOK_COUNT)
+hot_pairs = member_ids.product(hot_book_ids)
+
+remaining_needed = non_returned_count - hot_pairs.size
+remaining_pool = member_ids.product(book_ids - hot_book_ids)
+remaining_pairs = remaining_pool.sample([remaining_needed, 0].max)
+
+non_returned_pairs = hot_pairs + remaining_pairs
 
 borrow_rows = []
 
