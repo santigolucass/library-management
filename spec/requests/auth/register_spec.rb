@@ -40,7 +40,20 @@ RSpec.describe "POST /auth/register", type: :request do
 
     expect(response.status).to eq(422)
     json = JSON.parse(response.body)
-    expect(json.keys).to eq(["errors"])
+    expect(json.keys).to eq([ "errors" ])
     expect(json["errors"]).to be_a(Hash)
+  end
+
+  it "returns validation errors when role is invalid" do
+    post "/api/v1/auth/register", params: {
+      email: "invalid_role@example.com",
+      password: "password123",
+      role: "admin"
+    }, as: :json
+
+    expect(response.status).to eq(422)
+    json = JSON.parse(response.body)
+    expect(json.keys).to eq([ "errors" ])
+    expect(json["errors"]).to have_key("role")
   end
 end

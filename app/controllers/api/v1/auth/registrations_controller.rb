@@ -2,10 +2,9 @@ module Api
   module V1
     module Auth
       class RegistrationsController < ApplicationController
-
         def create
           user = User.new(sign_up_params)
-          user.role ||= "member"
+          user.role = requested_role
 
           if user.save
             sign_in(:user, user, store: false)
@@ -18,7 +17,14 @@ module Api
         private
 
         def sign_up_params
-          params.permit(:email, :password, :role)
+          params.permit(:email, :password)
+        end
+
+        def requested_role
+          role = params[:role]
+          return "member" if role.blank?
+
+          role.to_s
         end
 
         def render_auth_response(user, status)
