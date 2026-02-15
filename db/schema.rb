@@ -51,7 +51,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_15_022749) do
     t.datetime "exp", null: false
     t.string "jti", null: false
     t.datetime "updated_at", null: false
-    t.index [ "jti" ], name: "index_jwt_denylists_on_jti", unique: true
+    t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -64,7 +64,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_15_022749) do
     t.string "role", null: false
     t.datetime "updated_at", null: false
     t.index "lower((email)::text)", name: "index_users_on_lower_email", unique: true
-    t.index [ "reset_password_token" ], name: "index_users_on_reset_password_token", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.check_constraint "email::text = lower(email::text) AND email::text = btrim(email::text)", name: "users_email_canonical"
     t.check_constraint "role::text = ANY (ARRAY['librarian'::character varying::text, 'member'::character varying::text])", name: "users_role_allowed_values"
   end
