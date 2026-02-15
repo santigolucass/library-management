@@ -5,32 +5,16 @@ module Api
 
       def librarian
         authorize(:librarian_dashboard, :show?, policy_class: LibrarianDashboardPolicy)
-
-        overdue_members = Borrowing.overdue
-                                  .joins(:user)
-                                  .group("users.id", "users.email")
-                                  .order(Arel.sql("COUNT(*) DESC"), "users.id ASC")
-                                  .count
-                                  .map do |(user_id, email), overdue_count|
-          { user_id: user_id, email: email, overdue_count: overdue_count }
-        end
-
-        render json: {
-          total_books: Book.count,
-          total_borrowed_books: Borrowing.active.count,
-          books_due_today: Borrowing.where(due_at: Time.current.all_day).count,
-          overdue_members: overdue_members
-        }, status: :ok
+        render json: Dashboards::LibrarianSummaryQuery.call(now: Time.current), status: :ok
       end
 
       def member
         authorize(:member_dashboard, :show?, policy_class: MemberDashboardPolicy)
-
-        scope = policy_scope(Borrowing)
+        result = Dashboards::MemberSummaryQuery.call(scope: policy_scope(Borrowing), now: Time.current)
 
         render json: {
-          active_borrowings: scope.active.order(:id).map { |borrowing| borrowing_payload(borrowing) },
-          overdue_borrowings: scope.active.where("due_at < ?", Time.current).order(:id).map { |borrowing| borrowing_payload(borrowing) }
+          active_borrowings: result.active_borrowings.map { |borrowing| borrowing_payload(borrowing) },
+          overdue_borrowings: result.overdue_borrowings.map { |borrowing| borrowing_payload(borrowing) }
         }, status: :ok
       end
 

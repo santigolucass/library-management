@@ -6,14 +6,7 @@ module Api
 
       def index
         authorize(Book)
-        books = Book.order(:id)
-        if params[:q].present?
-          pattern = "%#{params[:q].strip.downcase}%"
-          books = books.where(
-            "LOWER(title) LIKE :q OR LOWER(author) LIKE :q OR LOWER(genre) LIKE :q",
-            q: pattern
-          )
-        end
+        books = Books::SearchService.call(scope: Book.order(:id), query: params[:q])
         render json: { data: books.map { |book| book_payload(book) } }, status: :ok
       end
 
@@ -25,23 +18,23 @@ module Api
       def create
         authorize(Book)
 
-        book = Book.new(book_params)
-        book.available_copies = book.total_copies if book.available_copies.nil?
+        result = Books::CreateService.call(params: book_params)
 
-        if book.save
-          render json: { data: book_payload(book) }, status: :created
+        if result.success?
+          render json: { data: book_payload(result.book) }, status: :created
         else
-          render json: { errors: book.errors.to_hash(true) }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_entity
         end
       end
 
       def update
         authorize(@book)
+        result = Books::UpdateService.call(book: @book, params: book_params)
 
-        if @book.update(book_params)
-          render json: { data: book_payload(@book) }, status: :ok
+        if result.success?
+          render json: { data: book_payload(result.book) }, status: :ok
         else
-          render json: { errors: @book.errors.to_hash(true) }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_entity
         end
       end
 
