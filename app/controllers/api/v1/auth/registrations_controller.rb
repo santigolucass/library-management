@@ -10,7 +10,7 @@ module Api
             sign_in(:user, user, store: false)
             render_auth_response(user, :created)
           else
-            render json: { errors: user.errors.to_hash(true) }, status: :unprocessable_entity
+            render json: { errors: user.errors.to_hash(true) }, status: :unprocessable_content
           end
         end
 

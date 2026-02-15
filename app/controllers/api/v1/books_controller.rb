@@ -23,7 +23,7 @@ module Api
         if result.success?
           render json: { data: book_payload(result.book) }, status: :created
         else
-          render json: { errors: result.errors }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_content
         end
       end
 
@@ -34,7 +34,7 @@ module Api
         if result.success?
           render json: { data: book_payload(result.book) }, status: :ok
         else
-          render json: { errors: result.errors }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_content
         end
       end
 
