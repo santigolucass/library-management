@@ -69,6 +69,20 @@ components:
         total_copies: { type: integer, minimum: 0 }
       required: [title, author, genre, isbn, total_copies]
 
+    BookUpdate:
+      type: object
+      description: >
+        Full update payload. `available_copies` is optional, but when provided must stay
+        consistent with active borrowings (`total_copies - available_copies == active_borrowings_for_book`).
+      properties:
+        title: { type: string }
+        author: { type: string }
+        genre: { type: string }
+        isbn: { type: string }
+        total_copies: { type: integer, minimum: 0 }
+        available_copies: { type: integer, minimum: 0 }
+      required: [title, author, genre, isbn, total_copies]
+
     Borrowing:
       type: object
       properties:
@@ -248,7 +262,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/BookCreate' }
+            schema: { $ref: '#/components/schemas/BookUpdate' }
       responses:
         '201':
           description: Created
