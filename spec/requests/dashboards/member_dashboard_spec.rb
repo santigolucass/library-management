@@ -26,6 +26,9 @@ RSpec.describe "GET /dashboard/member", type: :request do
     expect(response).to have_http_status(:ok)
     expect(json_response.fetch("active_borrowings").map { |b| b.fetch("id") }).to contain_exactly(active.id, overdue.id)
     expect(json_response.fetch("overdue_borrowings").map { |b| b.fetch("id") }).to contain_exactly(overdue.id)
-    expect(json_response.fetch("active_borrowings").first.keys).to include("id", "user_id", "book_id", "borrowed_at", "due_at", "returned_at")
+    payload = json_response.fetch("active_borrowings").find { |item| item.fetch("id") == active.id }
+    expect(payload.keys).to include("id", "user_id", "book_id", "borrowed_at", "due_at", "returned_at", "user", "book")
+    expect(payload.dig("user", "email")).to eq(member.email)
+    expect(payload.dig("book", "title")).to eq(book.title)
   end
 end
