@@ -2222,32 +2222,32 @@
   ],
   "variable": [
     {
-      "id": "96d48858-35ff-4c1c-9851-40420e59f9b2",
+      "id": "16d2f3ba-80b0-40db-a719-61a303720438",
       "key": "baseUrl",
       "value": "http://localhost:3000/api/v1"
     },
     {
-      "id": "80955187-24c9-4580-b5df-43642fc0c24b",
+      "id": "13233e0a-d83d-49c7-b310-b2ca64dac928",
       "key": "bearerToken",
       "value": ""
     },
     {
-      "id": "da5b388f-5f4c-40b5-b536-4d64ec9fdb33",
+      "id": "b7ad3211-929d-451e-9da0-ad6127499828",
       "key": "bookId",
       "value": ""
     },
     {
-      "id": "37fa071d-8ad4-4e23-8ea1-04dc1638947c",
+      "id": "ab874022-8c90-4c50-a628-fb489006ae31",
       "key": "borrowingId",
       "value": ""
     },
     {
-      "id": "e0fbd89a-0429-4a0b-9a22-2af569699e20",
+      "id": "20d08385-7801-4e71-b32d-14607d73f8a7",
       "key": "workflowBookId",
       "value": ""
     },
     {
-      "id": "7f9a84ae-4429-40d9-93f5-d1404c301980",
+      "id": "234af367-7b74-4462-98df-5fc306610286",
       "key": "workflowBorrowingId",
       "value": ""
     }
