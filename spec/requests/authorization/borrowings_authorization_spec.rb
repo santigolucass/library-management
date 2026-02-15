@@ -61,6 +61,11 @@ RSpec.describe "Borrowings authorization", type: :request do
     get "/api/v1/borrowings", headers: auth_headers_for(email: member.email, password: "password123"), as: :json
     ids = json_response.fetch("data").map { |item| item.fetch("id") }
     expect(ids).to contain_exactly(own.id)
+    borrowing_payload = json_response.fetch("data").first
+    expect(borrowing_payload.dig("user", "email")).to eq(member.email)
+    expect(borrowing_payload.dig("book", "title")).to eq(book.title)
+    expect(borrowing_payload).not_to have_key("user_id")
+    expect(borrowing_payload).not_to have_key("book_id")
 
     get "/api/v1/borrowings", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
     ids = json_response.fetch("data").map { |item| item.fetch("id") }
