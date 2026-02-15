@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_15_005316) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_022749) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,7 +23,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_15_005316) do
     t.string "title", null: false
     t.integer "total_copies", default: 0, null: false
     t.datetime "updated_at", null: false
-    t.index [ "isbn" ], name: "index_books_on_isbn", unique: true
+    t.index ["isbn"], name: "index_books_on_isbn", unique: true
     t.check_constraint "available_copies <= total_copies", name: "books_available_within_total"
     t.check_constraint "available_copies >= 0", name: "books_available_copies_non_negative"
     t.check_constraint "total_copies >= 0", name: "books_total_copies_non_negative"
@@ -37,9 +37,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_15_005316) do
     t.datetime "returned_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index [ "book_id" ], name: "index_borrowings_on_book_id"
-    t.index [ "returned_at" ], name: "index_borrowings_on_returned_at"
-    t.index [ "user_id" ], name: "index_borrowings_on_user_id"
+    t.index ["book_id"], name: "index_borrowings_on_book_id"
+    t.index ["due_at"], name: "index_borrowings_on_due_at"
+    t.index ["returned_at"], name: "index_borrowings_on_returned_at"
+    t.index ["user_id", "book_id"], name: "index_borrowings_on_user_and_book_when_active", unique: true, where: "(returned_at IS NULL)"
+    t.index ["user_id"], name: "index_borrowings_on_user_id"
     t.check_constraint "due_at > borrowed_at", name: "borrowings_due_after_borrowed"
     t.check_constraint "returned_at IS NULL OR returned_at >= borrowed_at", name: "borrowings_returned_after_borrowed"
   end
