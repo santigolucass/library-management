@@ -57,3 +57,5 @@ end
 gem "devise", "~> 5.0"
 
 gem "devise-jwt", "~> 0.13.0"
+
+gem "pundit", "~> 2.5"
