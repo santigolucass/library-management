@@ -15,7 +15,7 @@ class ApplicationController < ActionController::API
     return render_unauthorized if JwtDenylist.exists?(jti: payload.fetch("jti"))
 
     @current_api_user = User.find_by(id: payload.fetch("sub"))
-    return render_unauthorized unless @current_api_user
+    render_unauthorized unless @current_api_user
   rescue JWT::DecodeError, KeyError
     render_unauthorized
   end
