@@ -1,6 +1,8 @@
 module Api
   module V1
     class BooksController < ApplicationController
+      REQUIRED_UPDATE_FIELDS = %i[title author genre isbn total_copies].freeze
+
       before_action :authenticate_api_user!
       before_action :set_book, only: %i[show update destroy]
 
@@ -30,6 +32,11 @@ module Api
 
       def update
         authorize(@book)
+        if missing_update_fields.any?
+          render json: { errors: required_update_field_errors }, status: :unprocessable_content
+          return
+        end
+
         result = Books::UpdateService.call(book: @book, params: book_params)
 
         if result.success?
@@ -59,6 +66,14 @@ module Api
 
       def book_params
         params.permit(:title, :author, :genre, :isbn, :total_copies, :available_copies)
+      end
+
+      def missing_update_fields
+        @missing_update_fields ||= REQUIRED_UPDATE_FIELDS.reject { |field| book_params.key?(field) }
+      end
+
+      def required_update_field_errors
+        missing_update_fields.index_with { [ "is required" ] }
       end
 
       def book_payload(book)

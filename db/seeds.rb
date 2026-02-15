@@ -36,7 +36,7 @@ book_rows = Array.new(TOTAL_BOOKS) do |index|
   {
     title: "Book #{index + 1}",
     author: "Author #{(index % 40) + 1}",
-    genre: ["Software", "Sci-Fi", "History", "Fantasy", "Biography"][index % 5],
+    genre: [ "Software", "Sci-Fi", "History", "Fantasy", "Biography" ][index % 5],
     isbn: format("978000%07d", index + 1),
     total_copies: BOOK_TOTAL_COPIES,
     available_copies: BOOK_TOTAL_COPIES,
@@ -57,7 +57,7 @@ hot_pairs = member_ids.product(hot_book_ids)
 
 remaining_needed = non_returned_count - hot_pairs.size
 remaining_pool = member_ids.product(book_ids - hot_book_ids)
-remaining_pairs = remaining_pool.sample([remaining_needed, 0].max)
+remaining_pairs = remaining_pool.sample([ remaining_needed, 0 ].max)
 
 non_returned_pairs = hot_pairs + remaining_pairs
 
@@ -112,7 +112,7 @@ active_counts = Borrowing.active.group(:book_id).count
 
 Book.find_each do |book|
   active_count = active_counts.fetch(book.id, 0)
-  desired_available = [book.total_copies - active_count, 0].max
+  desired_available = [ book.total_copies - active_count, 0 ].max
 
   next if book.available_copies == desired_available
 

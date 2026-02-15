@@ -52,6 +52,16 @@ RSpec.describe "Books lifecycle", type: :request do
     expect(json_response.fetch("errors")).to include("title")
   end
 
+  it "returns validation errors when required update fields are missing" do
+    patch "/api/v1/books/#{book.id}",
+          params: { title: "Updated Only Title" },
+          headers: headers,
+          as: :json
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(json_response.fetch("errors")).to include("author", "genre", "isbn", "total_copies")
+  end
+
   it "returns validation errors on invalid create" do
     post "/api/v1/books",
          params: { title: "", author: "", genre: "", isbn: "", total_copies: 1 },

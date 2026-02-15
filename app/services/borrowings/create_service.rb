@@ -1,6 +1,7 @@
 module Borrowings
   class CreateService
     DUE_IN_DAYS = 14
+    DEFAULT_CONFLICT_ERROR = "Conflict".freeze
 
     Result = Struct.new(:borrowing, :error, keyword_init: true) do
       def success?
@@ -30,8 +31,10 @@ module Borrowings
       if borrowing.save
         Result.new(borrowing: borrowing)
       else
-        Result.new(error: borrowing.errors.full_messages.to_sentence.presence || "Conflict")
+        Result.new(error: borrowing.errors.full_messages.to_sentence.presence || DEFAULT_CONFLICT_ERROR)
       end
+    rescue ActiveRecord::RecordNotUnique, ActiveRecord::StatementInvalid
+      Result.new(error: DEFAULT_CONFLICT_ERROR)
     end
 
     private

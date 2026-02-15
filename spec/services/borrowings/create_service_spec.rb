@@ -28,4 +28,14 @@ RSpec.describe Borrowings::CreateService do
     expect(result).not_to be_success
     expect(result.error).to be_present
   end
+
+  it "returns conflict instead of raising when persistence hits race constraints" do
+    allow_any_instance_of(Borrowing).to receive(:save).and_raise(ActiveRecord::RecordNotUnique.new("duplicate key value"))
+
+    expect do
+      result = described_class.call(user: member, book_id: book.id, now: Time.current)
+      expect(result).not_to be_success
+      expect(result.error).to be_present
+    end.not_to raise_error
+  end
 end

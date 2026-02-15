@@ -46,6 +46,6 @@ RSpec.describe "GET /books search", type: :request do
     get "/api/v1/books", headers: headers
 
     ids = json_response.fetch("data").map { |item| item.fetch("id") }
-    expect(ids).to eq([book_one.id, book_three.id, book_two.id])
+    expect(ids).to eq([ book_one.id, book_three.id, book_two.id ])
   end
 end
