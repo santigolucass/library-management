@@ -67,5 +67,35 @@ RSpec.describe Book, type: :model do
       expect(book).not_to be_valid
       expect(book.errors[:available_copies]).to include("must be less than or equal to total copies")
     end
+
+    it "defaults available_copies to total_copies when available_copies is nil" do
+      new_book = described_class.new(
+        title: "Default Copies",
+        author: "Author",
+        genre: "Genre",
+        isbn: "9780441013999",
+        total_copies: 7,
+        available_copies: nil
+      )
+
+      new_book.valid?
+
+      expect(new_book.available_copies).to eq(7)
+    end
+
+    it "keeps available_copies nil when total_copies is nil" do
+      new_book = described_class.new(
+        title: "Nil Total",
+        author: "Author",
+        genre: "Genre",
+        isbn: "9780441013888",
+        total_copies: nil,
+        available_copies: nil
+      )
+
+      new_book.valid?
+
+      expect(new_book.available_copies).to be_nil
+    end
   end
 end
