@@ -6,9 +6,9 @@ module Api
 
       def index
         authorize(Borrowing)
-        borrowings = policy_scope(Borrowing).order(:id)
+        borrowings = policy_scope(Borrowing).includes(:user, :book).order(:id)
 
-        render json: { data: borrowings.map { |borrowing| borrowing_payload(borrowing) } }, status: :ok
+        render json: { data: borrowings.map { |borrowing| borrowing_list_payload(borrowing) } }, status: :ok
       end
 
       def borrow
@@ -46,7 +46,32 @@ module Api
           book_id: borrowing.book_id,
           borrowed_at: borrowing.borrowed_at,
           due_at: borrowing.due_at,
-          returned_at: borrowing.returned_at
+          returned_at: borrowing.returned_at,
+          user: {
+            id: borrowing.user_id,
+            email: borrowing.user.email
+          },
+          book: {
+            id: borrowing.book_id,
+            title: borrowing.book.title
+          }
+        }
+      end
+
+      def borrowing_list_payload(borrowing)
+        {
+          id: borrowing.id,
+          borrowed_at: borrowing.borrowed_at,
+          due_at: borrowing.due_at,
+          returned_at: borrowing.returned_at,
+          user: {
+            id: borrowing.user_id,
+            email: borrowing.user.email
+          },
+          book: {
+            id: borrowing.book_id,
+            title: borrowing.book.title
+          }
         }
       end
     end

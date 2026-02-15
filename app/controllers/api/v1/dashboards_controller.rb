@@ -27,7 +27,15 @@ module Api
           book_id: borrowing.book_id,
           borrowed_at: borrowing.borrowed_at,
           due_at: borrowing.due_at,
-          returned_at: borrowing.returned_at
+          returned_at: borrowing.returned_at,
+          user: {
+            id: borrowing.user_id,
+            email: borrowing.user.email
+          },
+          book: {
+            id: borrowing.book_id,
+            title: borrowing.book.title
+          }
         }
       end
     end
