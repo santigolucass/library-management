@@ -101,3 +101,29 @@ RAILS_ENV=test bin/rails db:prepare
 ```bash
 bundle exec rspec spec/models
 ```
+
+## Authentication (Devise + JWT Denylist)
+
+### Environment variables
+
+- `DEVISE_JWT_SECRET_KEY`
+- `DEVISE_JWT_EXPIRATION_TIME` (seconds, default `86400`)
+
+### Run auth setup
+
+```bash
+bin/rails db:migrate
+RAILS_ENV=test bin/rails db:prepare
+```
+
+### Run auth request specs
+
+```bash
+bundle exec rspec spec/requests/auth
+```
+
+### Auth endpoints
+
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `DELETE /api/v1/auth/logout`

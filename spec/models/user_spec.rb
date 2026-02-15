@@ -7,7 +7,14 @@ RSpec.describe User, type: :model do
   end
 
   describe "validations" do
-    subject(:user) { described_class.new(email: "user@example.com", role: "member") }
+    subject(:user) do
+      described_class.new(
+        email: "user@example.com",
+        password: "password123",
+        password_confirmation: "password123",
+        role: "member"
+      )
+    end
 
     it "is valid with email and supported role" do
       expect(user).to be_valid
@@ -27,8 +34,18 @@ RSpec.describe User, type: :model do
     end
 
     it "requires unique email case-insensitively" do
-      described_class.create!(email: "user@example.com", role: "member")
-      duplicate = described_class.new(email: "USER@example.com", role: "librarian")
+      described_class.create!(
+        email: "user@example.com",
+        password: "password123",
+        password_confirmation: "password123",
+        role: "member"
+      )
+      duplicate = described_class.new(
+        email: "USER@example.com",
+        password: "password123",
+        password_confirmation: "password123",
+        role: "librarian"
+      )
 
       expect(duplicate).not_to be_valid
       expect(duplicate.errors[:email]).to be_present
@@ -43,7 +60,14 @@ RSpec.describe User, type: :model do
   end
 
   describe "deletion rules" do
-    let(:user) { described_class.create!(email: "delete_me@example.com", role: "member") }
+    let(:user) do
+      described_class.create!(
+        email: "delete_me@example.com",
+        password: "password123",
+        password_confirmation: "password123",
+        role: "member"
+      )
+    end
     let(:book) do
       Book.create!(
         title: "Clean Code",
