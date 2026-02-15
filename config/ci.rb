@@ -7,6 +7,7 @@ CI.run do
 
   step "Security: Gem audit", "bin/bundler-audit"
   step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
+  step "Performance: Dashboard query checks", "bundle exec rspec spec/performance/dashboard_queries_spec.rb"
 
 
   # Optional: set a green GitHub commit status to unblock PR merge.

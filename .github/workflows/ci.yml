@@ -6,6 +6,22 @@ on:
     branches: [ main ]
 
 jobs:
+  openapi_docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Validate OpenAPI HTML exists
+        run: test -s docs/openapi-v1.html
+
+      - name: Upload OpenAPI HTML artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-html-docs
+          path: docs/openapi-v1.html
+
   scan_ruby:
     runs-on: ubuntu-latest
 
@@ -89,3 +105,41 @@ jobs:
       - name: Run test suite
         run: bundle exec rspec
 
+  dashboard_performance:
+    runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+      N_PLUS_ONE_DETECTION: "false"
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5433
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME_TEST: library_management_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: library_management_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d library_management_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Prepare test database
+        run: bundle exec rails db:prepare
+
+      - name: Run dashboard performance checks
+        run: bundle exec rspec spec/performance/dashboard_queries_spec.rb
