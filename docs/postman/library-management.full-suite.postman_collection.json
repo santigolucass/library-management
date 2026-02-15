@@ -833,7 +833,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const payload = pm.response.json();",
+                  "pm.test('Book update returns a book payload', function () {",
+                  "  pm.expect(payload.data).to.be.an('object');",
+                  "  pm.expect(payload.data.id).to.be.a('number');",
+                  "  pm.expect(payload.data.title).to.be.a('string');",
+                  "  pm.expect(payload.data.available_copies).to.be.a('number');",
+                  "});"
                 ]
               }
             }
@@ -957,7 +964,20 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const payload = pm.response.json();",
+                  "pm.test('Borrowing list includes display objects and no top-level user_id/book_id', function () {",
+                  "  (payload.data || []).forEach(function (item) {",
+                  "    pm.expect(item.user).to.be.an('object');",
+                  "    pm.expect(item.user.id).to.be.a('number');",
+                  "    pm.expect(item.user.email).to.be.a('string');",
+                  "    pm.expect(item.book).to.be.an('object');",
+                  "    pm.expect(item.book.id).to.be.a('number');",
+                  "    pm.expect(item.book.title).to.be.a('string');",
+                  "    pm.expect(item).to.not.have.property('user_id');",
+                  "    pm.expect(item).to.not.have.property('book_id');",
+                  "  });",
+                  "});"
                 ]
               }
             }
@@ -1002,6 +1022,10 @@
                 "exec": [
                   "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
                   "const payload = pm.response.json();",
+                  "pm.test('Borrow payload includes user.email and book.title', function () {",
+                  "  pm.expect(payload.data.user.email).to.be.a('string');",
+                  "  pm.expect(payload.data.book.title).to.be.a('string');",
+                  "});",
                   "pm.collectionVariables.set('borrowingId', String(payload.data.id));"
                 ]
               }
@@ -1230,7 +1254,12 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const payload = pm.response.json();",
+                  "pm.test('Return payload includes user.email and book.title', function () {",
+                  "  pm.expect(payload.data.user.email).to.be.a('string');",
+                  "  pm.expect(payload.data.book.title).to.be.a('string');",
+                  "});"
                 ]
               }
             }
@@ -1330,7 +1359,16 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const payload = pm.response.json();",
+                  "pm.test('Member dashboard borrowings include user.email and book.title', function () {",
+                  "  (payload.active_borrowings || []).concat(payload.overdue_borrowings || []).forEach(function (item) {",
+                  "    pm.expect(item.user).to.be.an('object');",
+                  "    pm.expect(item.user.email).to.be.a('string');",
+                  "    pm.expect(item.book).to.be.an('object');",
+                  "    pm.expect(item.book.title).to.be.a('string');",
+                  "  });",
+                  "});"
                 ]
               }
             }
@@ -1753,6 +1791,8 @@
                     "exec": [
                       "pm.response.to.have.status(201);",
                       "const payload = pm.response.json();",
+                      "pm.expect(payload.data.user.email).to.be.a('string');",
+                      "pm.expect(payload.data.book.title).to.be.a('string');",
                       "pm.collectionVariables.set('workflowBorrowingId', String(payload.data.id));"
                     ]
                   }
@@ -1863,7 +1903,10 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.response.to.have.status(200);"
+                      "pm.response.to.have.status(200);",
+                      "const payload = pm.response.json();",
+                      "pm.expect(payload.data.user.email).to.be.a('string');",
+                      "pm.expect(payload.data.book.title).to.be.a('string');"
                     ]
                   }
                 }
@@ -2222,32 +2265,32 @@
   ],
   "variable": [
     {
-      "id": "16d2f3ba-80b0-40db-a719-61a303720438",
+      "id": "b423b669-6b70-4c3b-bdb7-c877a7cbd300",
       "key": "baseUrl",
       "value": "http://localhost:3000/api/v1"
     },
     {
-      "id": "13233e0a-d83d-49c7-b310-b2ca64dac928",
+      "id": "a4e756e2-4c99-4f52-81e1-1778918b0f73",
       "key": "bearerToken",
       "value": ""
     },
     {
-      "id": "b7ad3211-929d-451e-9da0-ad6127499828",
+      "id": "45f44380-2c3d-48cb-8631-3c959b7df072",
       "key": "bookId",
       "value": ""
     },
     {
-      "id": "ab874022-8c90-4c50-a628-fb489006ae31",
+      "id": "f3cfcc30-fd54-4955-bbd2-2ba9f5955902",
       "key": "borrowingId",
       "value": ""
     },
     {
-      "id": "20d08385-7801-4e71-b32d-14607d73f8a7",
+      "id": "9d84aa56-32a9-4edf-92f2-f4a841bd903f",
       "key": "workflowBookId",
       "value": ""
     },
     {
-      "id": "234af367-7b74-4462-98df-5fc306610286",
+      "id": "5b334ae0-0a25-42b0-a066-9400aeacbeed",
       "key": "workflowBorrowingId",
       "value": ""
     }
