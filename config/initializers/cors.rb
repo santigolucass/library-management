@@ -1,16 +1,25 @@
-# Be sure to restart your server when you modify this file.
+allowed_origins = ENV.fetch("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+  .split(",")
+  .map(&:strip)
+  .reject(&:empty?)
 
-# Avoid CORS issues when API is called from the frontend app.
-# Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin Ajax requests.
+development_origin_patterns =
+  if Rails.env.development? || Rails.env.test?
+    [
+      %r{\Ahttp://localhost:\d+\z},
+      %r{\Ahttp://127\.0\.0\.1:\d+\z}
+    ]
+  else
+    []
+  end
 
-# Read more: https://github.com/cyu/rack-cors
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins(*(allowed_origins + development_origin_patterns))
 
-# Rails.application.config.middleware.insert_before 0, Rack::Cors do
-#   allow do
-#     origins "example.com"
-#
-#     resource "*",
-#       headers: :any,
-#       methods: [:get, :post, :put, :patch, :delete, :options, :head]
-#   end
-# end
+    resource "*",
+      headers: :any,
+      expose: [ "Authorization" ],
+      methods: [ :get, :post, :patch, :put, :delete, :options, :head ]
+  end
+end
