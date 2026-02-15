@@ -86,3 +86,18 @@ On macOS:
 ```bash
 open coverage/index.html
 ```
+
+## Core Domain Baseline (User, Book, Borrowing)
+
+### Run database migrations
+
+```bash
+bin/rails db:migrate
+RAILS_ENV=test bin/rails db:prepare
+```
+
+### Run model specs
+
+```bash
+bundle exec rspec spec/models
+```
