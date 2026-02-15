@@ -40,6 +40,12 @@ module Api
 
       def destroy
         authorize(@book)
+        if @book.borrowings.active.exists?
+          render json: { error: "Book has active borrowings" }, status: :conflict
+          return
+        end
+
+        @book.borrowings.where.not(returned_at: nil).delete_all
         @book.destroy!
         head :no_content
       end
