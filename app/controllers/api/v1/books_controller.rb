@@ -6,7 +6,8 @@ module Api
 
       def index
         authorize(Book)
-        books = Books::SearchService.call(scope: Book.order(:id), query: params[:q])
+        availability_order_sql = "CASE WHEN available_copies > 0 THEN 0 ELSE 1 END"
+        books = Books::SearchService.call(scope: Book.order(Arel.sql(availability_order_sql), :id), query: params[:q])
         render json: { data: books.map { |book| book_payload(book) } }, status: :ok
       end
 

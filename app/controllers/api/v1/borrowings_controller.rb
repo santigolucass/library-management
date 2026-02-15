@@ -6,7 +6,25 @@ module Api
 
       def index
         authorize(Borrowing)
-        borrowings = policy_scope(Borrowing).includes(:user, :book).order(:id)
+        now = Time.current
+        status_order_sql = ApplicationRecord.sanitize_sql_array(
+          [
+            <<~SQL.squish,
+              CASE
+                WHEN returned_at IS NULL AND due_at >= ? THEN 0
+                WHEN returned_at IS NULL AND due_at < ? THEN 1
+                ELSE 2
+              END
+            SQL
+            now,
+            now
+          ]
+        )
+
+        borrowings = policy_scope(Borrowing)
+          .includes(:user, :book)
+          .order(Arel.sql(status_order_sql))
+          .order(:due_at, :id)
 
         render json: { data: borrowings.map { |borrowing| borrowing_list_payload(borrowing) } }, status: :ok
       end

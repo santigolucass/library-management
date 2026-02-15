@@ -223,6 +223,7 @@ paths:
   /books:
     get:
       summary: List/search books
+      description: Ordered with available books first (`available_copies > 0`), then unavailable books.
       parameters:
         - in: query
           name: q
@@ -329,6 +330,7 @@ paths:
   /borrowings:
     get:
       summary: "List borrowings (member: own; librarian: all)"
+      description: Ordered by status as active, overdue, then returned. Within each group, ordered by due date.
       responses:
         '401':
           description: Unauthorized

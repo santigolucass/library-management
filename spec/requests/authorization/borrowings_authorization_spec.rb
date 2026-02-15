@@ -71,4 +71,19 @@ RSpec.describe "Borrowings authorization", type: :request do
     ids = json_response.fetch("data").map { |item| item.fetch("id") }
     expect(ids).to include(own.id, other.id)
   end
+
+  it "orders borrowings as active, overdue, then returned" do
+    active_book = Book.create!(title: "Active Book", author: "A", genre: "G", isbn: "9780000000101", total_copies: 2, available_copies: 2)
+    overdue_book = Book.create!(title: "Overdue Book", author: "B", genre: "G", isbn: "9780000000102", total_copies: 2, available_copies: 2)
+    returned_book = Book.create!(title: "Returned Book", author: "C", genre: "G", isbn: "9780000000103", total_copies: 2, available_copies: 2)
+
+    returned = Borrowing.create!(user: member, book: returned_book, borrowed_at: 7.days.ago, due_at: 3.days.ago, returned_at: 1.day.ago)
+    overdue = Borrowing.create!(user: another_member, book: overdue_book, borrowed_at: 10.days.ago, due_at: 1.day.ago)
+    active = Borrowing.create!(user: member, book: active_book, borrowed_at: 1.day.ago, due_at: 5.days.from_now)
+
+    get "/api/v1/borrowings", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
+
+    ids = json_response.fetch("data").map { |item| item.fetch("id") }
+    expect(ids).to eq([active.id, overdue.id, returned.id])
+  end
 end

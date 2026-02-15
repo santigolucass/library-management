@@ -39,4 +39,13 @@ RSpec.describe "GET /books search", type: :request do
     ids = json_response.fetch("data").map { |item| item.fetch("id") }
     expect(ids).to contain_exactly(book_one.id, book_three.id)
   end
+
+  it "orders available books before unavailable books" do
+    book_two.update!(available_copies: 0)
+
+    get "/api/v1/books", headers: headers
+
+    ids = json_response.fetch("data").map { |item| item.fetch("id") }
+    expect(ids).to eq([book_one.id, book_three.id, book_two.id])
+  end
 end
