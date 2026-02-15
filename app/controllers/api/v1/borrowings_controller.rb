@@ -13,30 +13,23 @@ module Api
 
       def borrow
         authorize(Borrowing, :borrow?)
+        result = Borrowings::CreateService.call(user: current_api_user, book_id: params[:book_id], now: Time.current)
 
-        book = Book.find(params[:book_id])
-        borrowing = Borrowing.new(
-          user: current_api_user,
-          book: book,
-          borrowed_at: Time.current,
-          due_at: 14.days.from_now,
-          returned_at: nil
-        )
-
-        if borrowing.save
-          render json: { data: borrowing_payload(borrowing) }, status: :created
+        if result.success?
+          render json: { data: borrowing_payload(result.borrowing) }, status: :created
         else
-          render json: { error: borrowing.errors.full_messages.to_sentence.presence || "Conflict" }, status: :conflict
+          render json: { error: result.error }, status: :conflict
         end
       end
 
       def mark_returned
         authorize(@borrowing, :return?)
+        result = Borrowings::ReturnService.call(borrowing: @borrowing, now: Time.current)
 
-        if @borrowing.update(returned_at: Time.current)
-          render json: { data: borrowing_payload(@borrowing) }, status: :ok
+        if result.success?
+          render json: { data: borrowing_payload(result.borrowing) }, status: :ok
         else
-          render json: { errors: @borrowing.errors.to_hash(true) }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_entity
         end
       end
 
