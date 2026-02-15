@@ -23,7 +23,7 @@ module Api
         if result.success?
           render json: { data: book_payload(result.book) }, status: :created
         else
-          render json: { errors: result.errors }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_content
         end
       end
 
@@ -34,12 +34,18 @@ module Api
         if result.success?
           render json: { data: book_payload(result.book) }, status: :ok
         else
-          render json: { errors: result.errors }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_content
         end
       end
 
       def destroy
         authorize(@book)
+        if @book.borrowings.active.exists?
+          render json: { error: "Book has active borrowings" }, status: :conflict
+          return
+        end
+
+        @book.borrowings.where.not(returned_at: nil).delete_all
         @book.destroy!
         head :no_content
       end

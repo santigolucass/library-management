@@ -43,6 +43,17 @@ RSpec.describe "Borrowings authorization", type: :request do
     expect(json_response).to eq("error" => "Forbidden")
   end
 
+  it "returns unprocessable entity when return service fails" do
+    borrowing = Borrowing.create!(user: member, book: book, borrowed_at: Time.current, due_at: 7.days.from_now)
+    result = instance_double(Borrowings::ReturnService::Result, success?: false, errors: { returned_at: ["is invalid"] })
+    allow(Borrowings::ReturnService).to receive(:call).and_return(result)
+
+    post "/api/v1/borrowings/#{borrowing.id}/return", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(json_response).to eq("errors" => { "returned_at" => ["is invalid"] })
+  end
+
   it "scopes borrowing list for members and allows librarians to view all" do
     own = Borrowing.create!(user: member, book: book, borrowed_at: Time.current, due_at: 7.days.from_now)
     other = Borrowing.create!(user: another_member, book: book, borrowed_at: Time.current, due_at: 7.days.from_now)

@@ -29,7 +29,7 @@ module Api
         if result.success?
           render json: { data: borrowing_payload(result.borrowing) }, status: :ok
         else
-          render json: { errors: result.errors }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_content
         end
       end
 
