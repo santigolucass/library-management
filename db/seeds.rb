@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "faker"
+
 TOTAL_MEMBERS = 30
 TOTAL_BOOKS = 50
 TOTAL_BORROWINGS = 1_000
@@ -11,6 +13,8 @@ BOOK_TOTAL_COPIES = 25
 DEFAULT_PASSWORD = "123123123"
 
 now = Time.current
+Faker::Config.random = Random.new(42)
+Faker::UniqueGenerator.clear
 
 Borrowing.delete_all
 Book.delete_all
@@ -24,8 +28,11 @@ librarian = User.create!(
 )
 
 members = Array.new(TOTAL_MEMBERS) do |index|
+  name_token = Faker::Name.name.downcase.gsub(/[^a-z]/, "")
+  name_token = "member" if name_token.empty?
+
   User.create!(
-    email: format("member%03d@demo.local", index + 1),
+    email: "#{name_token}.#{index + 1}@demo.local",
     password: DEFAULT_PASSWORD,
     password_confirmation: DEFAULT_PASSWORD,
     role: "member"
@@ -34,9 +41,9 @@ end
 
 book_rows = Array.new(TOTAL_BOOKS) do |index|
   {
-    title: "Book #{index + 1}",
-    author: "Author #{(index % 40) + 1}",
-    genre: [ "Software", "Sci-Fi", "History", "Fantasy", "Biography" ][index % 5],
+    title: Faker::Book.title,
+    author: Faker::Book.author,
+    genre: Faker::Book.genre,
     isbn: format("978000%07d", index + 1),
     total_copies: BOOK_TOTAL_COPIES,
     available_copies: BOOK_TOTAL_COPIES,
