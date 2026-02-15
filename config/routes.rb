@@ -14,6 +14,17 @@ Rails.application.routes.draw do
         post "auth/login", to: "auth/sessions#create"
         delete "auth/logout", to: "auth/sessions#destroy"
       end
+
+      resources :books, only: %i[index create show update destroy]
+      resources :borrowings, only: :index do
+        collection do
+          post :borrow
+        end
+      end
+      post "borrowings/:id/return", to: "borrowings#mark_returned"
+
+      get "dashboard/librarian", to: "dashboards#librarian"
+      get "dashboard/member", to: "dashboards#member"
     end
   end
 end
