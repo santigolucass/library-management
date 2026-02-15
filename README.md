@@ -76,6 +76,15 @@ RAILS_ENV=test bin/rails db:prepare
 bundle exec rspec
 ```
 
+Targeted suites:
+
+```bash
+bundle exec rspec spec/models
+bundle exec rspec spec/requests/auth
+bundle exec rspec spec/requests/authorization
+bundle exec rspec spec/requests/books spec/requests/borrowings spec/requests/dashboards
+```
+
 ### View coverage report
 
 Coverage HTML is generated at:
