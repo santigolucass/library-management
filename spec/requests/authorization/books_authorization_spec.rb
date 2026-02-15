@@ -69,4 +69,13 @@ RSpec.describe "Books authorization", type: :request do
     expect(response).to have_http_status(:forbidden)
     expect(json_response).to eq("error" => "Forbidden")
   end
+
+  it "returns 409 when deleting a book that has borrowings" do
+    Borrowing.create!(user: member, book: book, borrowed_at: Time.current, due_at: 7.days.from_now)
+
+    delete "/api/v1/books/#{book.id}", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
+
+    expect(response).to have_http_status(:conflict)
+    expect(json_response).to include("error")
+  end
 end

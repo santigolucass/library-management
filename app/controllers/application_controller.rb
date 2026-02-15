@@ -4,6 +4,7 @@ class ApplicationController < ActionController::API
 
   rescue_from Pundit::NotAuthorizedError, with: :render_forbidden
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from ActiveRecord::DeleteRestrictionError, with: :render_conflict
 
   private
 
@@ -38,5 +39,9 @@ class ApplicationController < ActionController::API
 
   def render_not_found
     render json: { error: "Not found" }, status: :not_found
+  end
+
+  def render_conflict
+    render json: { error: "Conflict" }, status: :conflict
   end
 end
