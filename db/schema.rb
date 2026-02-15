@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_15_003000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_005316) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,14 +44,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_15_003000) do
     t.check_constraint "returned_at IS NULL OR returned_at >= borrowed_at", name: "borrowings_returned_after_borrowed"
   end
 
+  create_table "jwt_denylists", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "exp", null: false
+    t.string "jti", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.datetime "remember_created_at"
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
     t.string "role", null: false
     t.datetime "updated_at", null: false
     t.index "lower((email)::text)", name: "index_users_on_lower_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.check_constraint "email::text = lower(email::text) AND email::text = btrim(email::text)", name: "users_email_canonical"
-    t.check_constraint "role::text = ANY (ARRAY['librarian'::character varying, 'member'::character varying]::text[])", name: "users_role_allowed_values"
+    t.check_constraint "role::text = ANY (ARRAY['librarian'::character varying::text, 'member'::character varying::text])", name: "users_role_allowed_values"
   end
 
   add_foreign_key "borrowings", "books"
