@@ -58,6 +58,18 @@ RSpec.describe "DELETE /auth/logout", type: :request do
     expect(json).to include("error")
   end
 
+  it "returns unauthorized when JWT is expired" do
+    decoder = instance_double(Warden::JWTAuth::TokenDecoder)
+    allow(Warden::JWTAuth::TokenDecoder).to receive(:new).and_return(decoder)
+    allow(decoder).to receive(:call).and_raise(JWT::ExpiredSignature)
+
+    delete "/api/v1/auth/logout", headers: { "Authorization" => "Bearer expired.token" }, as: :json
+
+    expect(response).to have_http_status(:unauthorized)
+    json = JSON.parse(response.body)
+    expect(json).to include("error")
+  end
+
   it "returns unauthorized when token payload is missing required keys" do
     decoder = instance_double(Warden::JWTAuth::TokenDecoder)
     allow(Warden::JWTAuth::TokenDecoder).to receive(:new).and_return(decoder)
