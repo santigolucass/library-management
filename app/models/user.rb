@@ -3,9 +3,14 @@ class User < ApplicationRecord
 
   enum :role, ROLES.index_with(&:itself), validate: true
 
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable,
+         :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
+
   has_many :borrowings, dependent: :destroy
   has_many :books, through: :borrowings
 
+  before_validation :assign_default_role
   before_validation :normalize_email
   before_destroy :ensure_no_active_borrowings, prepend: true
 
@@ -14,6 +19,10 @@ class User < ApplicationRecord
   validates :role, presence: true
 
   private
+
+  def assign_default_role
+    self.role = "member" if role.blank?
+  end
 
   def normalize_email
     self.email = email.to_s.strip.downcase

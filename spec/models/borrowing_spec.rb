@@ -1,7 +1,14 @@
 require "rails_helper"
 
 RSpec.describe Borrowing, type: :model do
-  let!(:user) { User.create!(email: "member@example.com", role: "member") }
+  let!(:user) do
+    User.create!(
+      email: "member@example.com",
+      password: "password123",
+      password_confirmation: "password123",
+      role: "member"
+    )
+  end
   let!(:book) do
     Book.create!(
       title: "1984",
