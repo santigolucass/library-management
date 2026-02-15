@@ -3,44 +3,22 @@ module Api
     module Auth
       class SessionsController < ApplicationController
         def create
-          user = User.find_for_database_authentication(email: params[:email].to_s.strip.downcase)
+          result = ::Auth::LoginService.call(email: params[:email], password: params[:password])
 
-          if user&.valid_password?(params[:password].to_s)
-            sign_in(:user, user, store: false)
-            token = jwt_token_for(user)
-            response.set_header("Authorization", "Bearer #{token}")
-            render json: { user: AuthUserPresenter.new(user).as_json, token: token }, status: :ok
+          if result.success?
+            sign_in(:user, result.user, store: false)
+            response.set_header("Authorization", "Bearer #{result.token}")
+            render json: { user: AuthUserPresenter.new(result.user).as_json, token: result.token }, status: :ok
           else
-            render json: { error: "Invalid email or password" }, status: :unauthorized
+            render json: { error: result.error }, status: :unauthorized
           end
         end
 
         def destroy
-          token = bearer_token
-          return render json: { error: "Unauthorized" }, status: :unauthorized if token.blank?
+          result = ::Auth::LogoutService.call(authorization_header: request.authorization)
+          return head :no_content if result.success?
 
-          payload = Warden::JWTAuth::TokenDecoder.new.call(token)
-          return render json: { error: "Unauthorized" }, status: :unauthorized if JwtDenylist.exists?(jti: payload.fetch("jti"))
-
-          user = User.find_by(id: payload.fetch("sub"))
-          return render json: { error: "Unauthorized" }, status: :unauthorized unless user
-
-          JwtDenylist.create!(jti: payload.fetch("jti"), exp: Time.at(payload.fetch("exp").to_i))
-          head :no_content
-        rescue JWT::DecodeError, KeyError, ActiveRecord::RecordInvalid
-          render json: { error: "Unauthorized" }, status: :unauthorized
-        rescue ActiveRecord::RecordNotUnique
-          render json: { error: "Unauthorized" }, status: :unauthorized
-        end
-
-        private
-
-        def jwt_token_for(user)
-          Warden::JWTAuth::UserEncoder.new.call(user, :user, nil).first
-        end
-
-        def bearer_token
-          request.authorization.to_s.split(" ", 2).last
+          render json: { error: result.error }, status: :unauthorized
         end
       end
     end
