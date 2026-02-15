@@ -18,6 +18,9 @@ RSpec.describe "GET /dashboard/librarian", type: :request do
   end
 
   it "returns aggregate metrics and overdue member list" do
+    baseline_books = Book.count
+    baseline_active_borrowings = Borrowing.active.count
+
     Borrowing.create!(user: member_one, book: book_a, borrowed_at: 10.days.ago, due_at: 1.day.ago, returned_at: nil)
     Borrowing.create!(user: member_one, book: book_b, borrowed_at: 12.days.ago, due_at: 2.days.ago, returned_at: nil)
     Borrowing.create!(user: member_two, book: book_b, borrowed_at: 2.days.ago, due_at: 5.days.from_now, returned_at: nil)
@@ -26,8 +29,8 @@ RSpec.describe "GET /dashboard/librarian", type: :request do
     get "/api/v1/dashboard/librarian", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
 
     expect(response).to have_http_status(:ok)
-    expect(json_response.fetch("total_books")).to eq(2)
-    expect(json_response.fetch("total_borrowed_books")).to eq(3)
+    expect(json_response.fetch("total_books")).to eq(baseline_books)
+    expect(json_response.fetch("total_borrowed_books")).to eq(baseline_active_borrowings + 3)
 
     overdue_members = json_response.fetch("overdue_members")
     expect(overdue_members).to include(

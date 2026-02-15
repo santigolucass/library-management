@@ -161,7 +161,7 @@ RSpec.describe Borrowing, type: :model do
         returned_at: 1.day.ago
       )
 
-      expect(described_class.overdue).to contain_exactly(overdue)
+      expect(described_class.overdue.where(user_id: user.id)).to contain_exactly(overdue)
     end
   end
 end
