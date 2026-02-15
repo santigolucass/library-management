@@ -311,7 +311,6 @@ paths:
                     type: array
                     items: { $ref: '#/components/schemas/Borrowing' }
                 required: [data]
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
 
   /borrowings/borrow:
     post:
