@@ -7,6 +7,8 @@ RSpec.describe Book, type: :model do
   end
 
   describe "validations" do
+    let(:unique_isbn) { "9780441013#{SecureRandom.random_number(10_000).to_s.rjust(4, '0')}" }
+
     subject(:book) do
       described_class.new(
         title: "The Hobbit",
@@ -27,7 +29,7 @@ RSpec.describe Book, type: :model do
         title: "Dune",
         author: "Frank Herbert",
         genre: "Sci-Fi",
-        isbn: "9780441013593",
+        isbn: unique_isbn,
         total_copies: 2,
         available_copies: 2
       )
@@ -36,7 +38,7 @@ RSpec.describe Book, type: :model do
         title: "Dune Messiah",
         author: "Frank Herbert",
         genre: "Sci-Fi",
-        isbn: "9780441013593",
+        isbn: unique_isbn,
         total_copies: 2,
         available_copies: 2
       )

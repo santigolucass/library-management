@@ -35,6 +35,7 @@ docker compose ps
 ```bash
 bin/rails db:prepare
 RAILS_ENV=test bin/rails db:prepare
+bin/rails db:seed
 ```
 
 ### 5. Validate database connectivity
@@ -73,6 +74,15 @@ RAILS_ENV=test bin/rails db:prepare
 
 ```bash
 bundle exec rspec
+```
+
+Targeted suites:
+
+```bash
+bundle exec rspec spec/models
+bundle exec rspec spec/requests/auth
+bundle exec rspec spec/requests/authorization
+bundle exec rspec spec/requests/books spec/requests/borrowings spec/requests/dashboards
 ```
 
 ### View coverage report
@@ -143,3 +153,15 @@ Run authorization request specs:
 ```bash
 bundle exec rspec spec/requests/authorization
 ```
+
+## Demo Seed Data
+
+Run:
+
+```bash
+bin/rails db:seed
+```
+
+Seeded demo users:
+- `librarian@demo.local` / `password123`
+- `member@demo.local` / `password123`

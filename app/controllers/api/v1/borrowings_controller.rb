@@ -26,7 +26,7 @@ module Api
         if borrowing.save
           render json: { data: borrowing_payload(borrowing) }, status: :created
         else
-          render json: { errors: borrowing.errors.to_hash(true) }, status: :unprocessable_entity
+          render json: { error: borrowing.errors.full_messages.to_sentence.presence || "Conflict" }, status: :conflict
         end
       end
 

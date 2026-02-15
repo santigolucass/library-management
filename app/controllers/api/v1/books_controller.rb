@@ -6,7 +6,15 @@ module Api
 
       def index
         authorize(Book)
-        render json: { data: Book.order(:id).map { |book| book_payload(book) } }, status: :ok
+        books = Book.order(:id)
+        if params[:q].present?
+          pattern = "%#{params[:q].strip.downcase}%"
+          books = books.where(
+            "LOWER(title) LIKE :q OR LOWER(author) LIKE :q OR LOWER(genre) LIKE :q",
+            q: pattern
+          )
+        end
+        render json: { data: books.map { |book| book_payload(book) } }, status: :ok
       end
 
       def show
