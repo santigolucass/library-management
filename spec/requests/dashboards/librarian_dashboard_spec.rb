@@ -11,10 +11,24 @@ RSpec.describe "GET /dashboard/librarian", type: :request do
     User.create!(email: "overdue_two@example.com", password: "password123", password_confirmation: "password123", role: "member")
   end
   let!(:book_a) do
-    Book.create!(title: "Book A", author: "Author A", genre: "Genre", isbn: "9780000000001", total_copies: 3, available_copies: 3)
+    Book.create!(
+      title: "Book A",
+      author: "Author A",
+      genre: "Genre",
+      isbn: "9781#{SecureRandom.random_number(1_000_000_000).to_s.rjust(9, '0')}",
+      total_copies: 3,
+      available_copies: 3
+    )
   end
   let!(:book_b) do
-    Book.create!(title: "Book B", author: "Author B", genre: "Genre", isbn: "9780000000002", total_copies: 3, available_copies: 3)
+    Book.create!(
+      title: "Book B",
+      author: "Author B",
+      genre: "Genre",
+      isbn: "9782#{SecureRandom.random_number(1_000_000_000).to_s.rjust(9, '0')}",
+      total_copies: 3,
+      available_copies: 3
+    )
   end
 
   it "returns aggregate metrics and overdue member list" do

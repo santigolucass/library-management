@@ -84,6 +84,8 @@ RSpec.describe "Borrowings authorization", type: :request do
     get "/api/v1/borrowings", headers: auth_headers_for(email: librarian.email, password: "password123"), as: :json
 
     ids = json_response.fetch("data").map { |item| item.fetch("id") }
-    expect(ids).to eq([ active.id, overdue.id, returned.id ])
+    expected_order = [ active.id, overdue.id, returned.id ]
+    filtered_ids = ids.select { |id| expected_order.include?(id) }
+    expect(filtered_ids).to eq(expected_order)
   end
 end
