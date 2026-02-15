@@ -6,11 +6,20 @@ module Api
       def librarian
         authorize(:librarian_dashboard, :show?, policy_class: LibrarianDashboardPolicy)
 
+        overdue_members = Borrowing.overdue
+                                  .joins(:user)
+                                  .group("users.id", "users.email")
+                                  .order(Arel.sql("COUNT(*) DESC"), "users.id ASC")
+                                  .count
+                                  .map do |(user_id, email), overdue_count|
+          { user_id: user_id, email: email, overdue_count: overdue_count }
+        end
+
         render json: {
           total_books: Book.count,
           total_borrowed_books: Borrowing.active.count,
           books_due_today: Borrowing.where(due_at: Time.current.all_day).count,
-          overdue_members: []
+          overdue_members: overdue_members
         }, status: :ok
       end
 
