@@ -1,7 +1,13 @@
 require "rails_helper"
 
 RSpec.describe "db/seeds.rb" do
-  before do
+  around do |example|
+    Borrowing.delete_all
+    Book.delete_all
+    User.delete_all
+
+    example.run
+  ensure
     Borrowing.delete_all
     Book.delete_all
     User.delete_all
