@@ -50,6 +50,7 @@ RSpec.describe "Books authorization", type: :request do
 
     expect(response).to have_http_status(:created)
     expect(json_response.fetch("data").fetch("title")).to eq("Librarian Book")
+    expect(json_response.fetch("data").fetch("available_copies")).to eq(2)
   end
 
   it "forbids members from updating and deleting books" do

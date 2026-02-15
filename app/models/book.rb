@@ -2,7 +2,7 @@ class Book < ApplicationRecord
   has_many :borrowings, dependent: :restrict_with_exception
   has_many :users, through: :borrowings
 
-  before_validation :default_available_copies
+  before_validation :set_available_copies_on_create, on: :create
 
   validates :title, :author, :genre, :isbn, presence: true
   validates :isbn, uniqueness: true
@@ -12,8 +12,7 @@ class Book < ApplicationRecord
 
   private
 
-  def default_available_copies
-    return unless available_copies.nil?
+  def set_available_copies_on_create
     return if total_copies.nil?
 
     self.available_copies = total_copies

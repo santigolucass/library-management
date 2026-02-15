@@ -54,21 +54,39 @@ RSpec.describe Book, type: :model do
       expect(book.errors[:total_copies]).to be_present
     end
 
-    it "does not allow negative available_copies" do
-      book.available_copies = -1
+    it "does not allow negative available_copies on updates" do
+      persisted = described_class.create!(
+        title: "The Hobbit",
+        author: "J.R.R. Tolkien",
+        genre: "Fantasy",
+        isbn: "9780007525492",
+        total_copies: 3,
+        available_copies: 3
+      )
 
-      expect(book).not_to be_valid
-      expect(book.errors[:available_copies]).to be_present
+      persisted.available_copies = -1
+
+      expect(persisted).not_to be_valid
+      expect(persisted.errors[:available_copies]).to be_present
     end
 
-    it "does not allow available_copies greater than total_copies" do
-      book.available_copies = 4
+    it "does not allow available_copies greater than total_copies on updates" do
+      persisted = described_class.create!(
+        title: "The Hobbit",
+        author: "J.R.R. Tolkien",
+        genre: "Fantasy",
+        isbn: "9780007525492",
+        total_copies: 3,
+        available_copies: 3
+      )
 
-      expect(book).not_to be_valid
-      expect(book.errors[:available_copies]).to include("must be less than or equal to total copies")
+      persisted.available_copies = 4
+
+      expect(persisted).not_to be_valid
+      expect(persisted.errors[:available_copies]).to include("must be less than or equal to total copies")
     end
 
-    it "defaults available_copies to total_copies when available_copies is nil" do
+    it "sets available_copies to total_copies on create when available_copies is nil" do
       new_book = described_class.new(
         title: "Default Copies",
         author: "Author",
@@ -76,6 +94,21 @@ RSpec.describe Book, type: :model do
         isbn: "9780441013999",
         total_copies: 7,
         available_copies: nil
+      )
+
+      new_book.valid?
+
+      expect(new_book.available_copies).to eq(7)
+    end
+
+    it "sets available_copies to total_copies on create even when available_copies is provided" do
+      new_book = described_class.new(
+        title: "Forced Copies",
+        author: "Author",
+        genre: "Genre",
+        isbn: "9780441013777",
+        total_copies: 7,
+        available_copies: 0
       )
 
       new_book.valid?
