@@ -6,14 +6,7 @@ module Api
 
       def index
         authorize(Book)
-        books = Book.order(:id)
-        if params[:q].present?
-          pattern = "%#{params[:q].strip.downcase}%"
-          books = books.where(
-            "LOWER(title) LIKE :q OR LOWER(author) LIKE :q OR LOWER(genre) LIKE :q",
-            q: pattern
-          )
-        end
+        books = Books::SearchService.call(scope: Book.order(:id), query: params[:q])
         render json: { data: books.map { |book| book_payload(book) } }, status: :ok
       end
 
